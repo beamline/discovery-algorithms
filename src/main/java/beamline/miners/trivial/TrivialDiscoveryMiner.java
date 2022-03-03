@@ -19,8 +19,8 @@ public class TrivialDiscoveryMiner extends StreamMiningAlgorithm<XTrace, Process
 	private Map<String, Double> activities = new HashMap<String, Double>();
 	private Double maxActivityFreq = Double.MIN_VALUE;
 	private Double maxRelationsFreq = Double.MIN_VALUE;
-	private double minDependency = 1d;
-	private int modelRefreshRate = 0;
+	private double minDependency = 0.8;
+	private int modelRefreshRate = 10;
 	
 	public TrivialDiscoveryMiner() {
 		
