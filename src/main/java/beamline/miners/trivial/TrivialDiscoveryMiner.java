@@ -12,7 +12,7 @@ import org.deckfour.xes.model.XTrace;
 
 import beamline.models.algorithms.StreamMiningAlgorithm;
 
-public class DiscoveryMiner extends StreamMiningAlgorithm<XTrace, ProcessMap> {
+public class TrivialDiscoveryMiner extends StreamMiningAlgorithm<XTrace, ProcessMap> {
 
 	private Map<String, String> latestActivityInCase = new HashMap<String, String>();
 	private Map<Pair<String, String>, Double> relations = new HashMap<Pair<String, String>, Double>();
@@ -22,7 +22,7 @@ public class DiscoveryMiner extends StreamMiningAlgorithm<XTrace, ProcessMap> {
 	private double minDependency = 1d;
 	private int modelRefreshRate = 0;
 	
-	public DiscoveryMiner() {
+	public TrivialDiscoveryMiner() {
 		
 	}
 	
