@@ -3,8 +3,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>beamline</groupId>
-	<artifactId>discovery-algorithms</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>discovery-trivial</artifactId>
+	<version>0.0.2</version>
 	
 	<properties>
 		<maven.compiler.source>11</maven.compiler.source>
@@ -22,22 +22,7 @@
 		<dependency>
 			<groupId>com.github.beamline</groupId>
 			<artifactId>framework</artifactId>
-			<version>0.0.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.10</version>
-		</dependency>
-		<dependency>
-			<groupId>org.reflections</groupId>
-			<artifactId>reflections</artifactId>
-			<version>0.10.2</version>
-		</dependency>
-		<dependency>
-			<groupId>com.googlecode.json-simple</groupId>
-			<artifactId>json-simple</artifactId>
-			<version>1.1.1</version>
+			<version>master-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>
