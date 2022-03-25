@@ -12,7 +12,6 @@ import beamline.graphviz.Dot;
 import beamline.graphviz.DotNode;
 import beamline.miners.trivial.ProcessMap;
 
-
 /**
  *
  * @author Andrea Burattin
@@ -37,17 +36,17 @@ public class PMDotModel extends Dot {
 		setOption("margin", "0.0,0.0");
 		setOption("outputorder", "edgesfirst");
 
-		Map<String, DotNode> activityToNode = new HashMap<String, DotNode>();
-		Map<String, String> nodeToActivity = new HashMap<String, String>();
+		Map<String, DotNode> activityToNode = new HashMap<>();
+		Map<String, String> nodeToActivity = new HashMap<>();
 
-		Set<DotNode> startNodes = new HashSet<DotNode>();
-		Set<DotNode> endNodes = new HashSet<DotNode>();
+		Set<DotNode> startNodes = new HashSet<>();
+		Set<DotNode> endNodes = new HashSet<>();
 
 		// add all activities
 		for(String activity : model.getActivities()) {
 			DotNode node = addNodeIfNeeded(activity, activityToNode, nodeToActivity);
 			if (node instanceof PMDotNode) {
-				((PMDotNode) node).setColorWeight(model.getActivityValue(activity), activityColor);
+				((PMDotNode) node).setColorWeight(model.getActivityRelativeFrequency(activity), activityColor);
 			}
 			if (model.isStartActivity(activity)) {
 				startNodes.add(node);
@@ -68,28 +67,32 @@ public class PMDotModel extends Dot {
 			DotNode targetNode = addNodeIfNeeded(targetActivity, activityToNode, nodeToActivity);
 
 			// adding relations
-			addRelation(sourceNode, targetNode, model.getRelationValue(relation));
+			addRelation(sourceNode, targetNode, model.getRelationRelativeValue(relation), model.getRelationAbsoluteValue(relation));
 		}
 
 		// add relations from start and end
-		if (startNodes.size() > 0) {
+		if (!startNodes.isEmpty()) {
 			PMDotStartNode start = new PMDotStartNode();
 			addNode(start);
 			for (DotNode n : startNodes) {
-				addRelation(start, n, null);
+				addRelation(start, n, null, null);
 			}
 		}
-		if (endNodes.size() > 0) {
+		if (!endNodes.isEmpty()) {
 			PMDotEndNode end = new PMDotEndNode();
 			addNode(end);
 			for (DotNode n : endNodes) {
-				addRelation(n, end, null);
+				addRelation(n, end, null, null);
 			}
 		}
 	}
 
-	private void addRelation(DotNode sourceNode, DotNode targetNode, Double value) {
-		addEdge(new PMDotEdge(sourceNode, targetNode, (value == null? null : String.format("%.2g%n", value)), value));
+	private void addRelation(DotNode sourceNode, DotNode targetNode, Double relativeFrequency, Double absoluteFrequency) {
+		String freqLabel = "";
+		if (relativeFrequency != null && absoluteFrequency != null) {
+			freqLabel = String.format("%.2g ", relativeFrequency) + "(" + absoluteFrequency.intValue() + ")";
+		}
+		addEdge(new PMDotEdge(sourceNode, targetNode, freqLabel, relativeFrequency));
 	}
 
 	private DotNode addNodeIfNeeded(String activity, Map<String, DotNode> activityToNode, Map<String, String> nodeToActivity) {
@@ -109,8 +112,8 @@ public class PMDotModel extends Dot {
 //				return endNode;
 //			} else {
 				PMDotNode newNode = new PMDotNode(activity.toString());
-				newNode.setColorWeight(model.getActivityValue(activity), activityColor);
-				newNode.setSecondLine(String.format("%.2g%n", model.getActivityValue(activity)));
+				newNode.setColorWeight(model.getActivityRelativeFrequency(activity), activityColor);
+				newNode.setSecondLine(String.format("%.2g%n", model.getActivityRelativeFrequency(activity)) + " (" + model.getActivityAbsoluteFrequency(activity).intValue() + ")");
 				addNode(newNode);
 				activityToNode.put(activity, newNode);
 				nodeToActivity.put(newNode.getId(), activity);

@@ -21,7 +21,7 @@
 		<dependency>
 			<groupId>com.github.beamline</groupId>
 			<artifactId>framework</artifactId>
-			<version>master-SNAPSHOT</version>
+			<version>0.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>

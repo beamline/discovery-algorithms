@@ -16,19 +16,19 @@ public class ProcessMapTests {
 	@Test
 	void test_add_activity() {
 		ProcessMap m = new ProcessMap();
-		m.addActivity("A", 1d);
-		m.addActivity("B", 1d);
-		m.addActivity("C", 1d);
+		m.addActivity("A", 1d, 1d);
+		m.addActivity("B", 1d, 1d);
+		m.addActivity("C", 1d, 1d);
 		assertTrue(m.getActivities().containsAll(Arrays.asList("A", "B", "C")));
 	}
 	
 	@Test
 	void test_remove_activity() {
 		ProcessMap m = new ProcessMap();
-		m.addActivity("A", 1d);
-		m.addActivity("B", 1d);
-		m.addActivity("C", 1d);
-		m.addActivity("D", 1d);
+		m.addActivity("A", 1d, 1d);
+		m.addActivity("B", 1d, 1d);
+		m.addActivity("C", 1d, 1d);
+		m.addActivity("D", 1d, 1d);
 		m.removeActivity("D");
 		assertTrue(m.getActivities().containsAll(Arrays.asList("A", "B", "C")));
 	}
@@ -36,17 +36,17 @@ public class ProcessMapTests {
 	@Test
 	void test_activity_value() {
 		ProcessMap m = new ProcessMap();
-		m.addActivity("A", 3.14d);
-		m.addActivity("B", 42d);
-		assertEquals(3.14d, m.getActivityValue("A"));
-		assertEquals(42d, m.getActivityValue("B"));
+		m.addActivity("A", 3.14d, 1d);
+		m.addActivity("B", 42d, 1d);
+		assertEquals(3.14d, m.getActivityRelativeFrequency("A"));
+		assertEquals(42d, m.getActivityRelativeFrequency("B"));
 	}
 	
 	@Test
 	void test_add_relation() {
 		ProcessMap m = new ProcessMap();
-		m.addRelation("A", "B", 1d);
-		m.addRelation("B", "C", 1d);
+		m.addRelation("A", "B", 1d, 1d);
+		m.addRelation("B", "C", 1d, 1d);
 		assertTrue(m.getRelations().containsAll(Arrays.asList(Pair.of("A", "B"), Pair.of("B", "C"))));
 		assertEquals(2, m.getRelations().size());
 	}
@@ -54,9 +54,9 @@ public class ProcessMapTests {
 	@Test
 	void test_remove_relation() {
 		ProcessMap m = new ProcessMap();
-		m.addRelation("A", "B", 1d);
-		m.addRelation("B", "C", 1d);
-		m.addRelation("B", "D", 1d);
+		m.addRelation("A", "B", 1d, 1d);
+		m.addRelation("B", "C", 1d, 1d);
+		m.addRelation("B", "D", 1d, 1d);
 		m.removeRelation("B", "C");
 		assertTrue(m.getRelations().containsAll(Arrays.asList(Pair.of("A", "B"), Pair.of("B", "D"))));
 		assertEquals(2, m.getRelations().size());
@@ -65,17 +65,17 @@ public class ProcessMapTests {
 	@Test
 	void test_relation_value() {
 		ProcessMap m = new ProcessMap();
-		m.addRelation("A", "B", 3.14d);
-		m.addRelation("B", "C", 42d);
-		assertEquals(3.14d, m.getRelationValue(Pair.of("A", "B")));
-		assertEquals(42d, m.getRelationValue(Pair.of("B", "C")));
+		m.addRelation("A", "B", 3.14d, 1d);
+		m.addRelation("B", "C", 42d, 1d);
+		assertEquals(3.14d, m.getRelationRelativeValue(Pair.of("A", "B")));
+		assertEquals(42d, m.getRelationRelativeValue(Pair.of("B", "C")));
 	}
 	
 	@Test
 	void test_start() {
 		ProcessMap m = new ProcessMap();
-		m.addRelation("A", "B", 1d);
-		m.addRelation("B", "C", 1d);
+		m.addRelation("A", "B", 1d, 1d);
+		m.addRelation("B", "C", 1d, 1d);
 		assertTrue(m.isStartActivity("A"));
 		assertFalse(m.isStartActivity("B"));
 		assertFalse(m.isStartActivity("C"));
@@ -84,8 +84,8 @@ public class ProcessMapTests {
 	@Test
 	void test_end() {
 		ProcessMap m = new ProcessMap();
-		m.addRelation("A", "B", 1d);
-		m.addRelation("B", "C", 1d);
+		m.addRelation("A", "B", 1d, 1d);
+		m.addRelation("B", "C", 1d, 1d);
 		assertFalse(m.isEndActivity("A"));
 		assertFalse(m.isEndActivity("B"));
 		assertTrue(m.isEndActivity("C"));
@@ -94,9 +94,9 @@ public class ProcessMapTests {
 	@Test
 	void test_isolated() {
 		ProcessMap m = new ProcessMap();
-		m.addRelation("A", "B", 1d);
-		m.addRelation("B", "C", 1d);
-		m.addActivity("D", 1d);
+		m.addRelation("A", "B", 1d, 1d);
+		m.addRelation("B", "C", 1d, 1d);
+		m.addActivity("D", 1d, 1d);
 		assertFalse(m.isIsolatedNode("A"));
 		assertFalse(m.isIsolatedNode("B"));
 		assertFalse(m.isIsolatedNode("C"));

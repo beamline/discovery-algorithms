@@ -12,10 +12,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class ProcessMap implements GraphvizResponse {
+public class ProcessMap extends GraphvizResponse {
 
-	private Map<String, Double> activities;
-	private Map<Pair<String, String>, Double> relations;
+	private static final long serialVersionUID = 6248452599496125805L;
+	private Map<String, Pair<Double, Double>> activities;
+	private Map<Pair<String, String>, Pair<Double, Double>> relations;
+	private Set<String> startingActivities;
+	private Set<String> endingActivities;
 
 	@Override
 	public Dot generateDot() {
@@ -23,20 +26,22 @@ public class ProcessMap implements GraphvizResponse {
 	}
 
 	public ProcessMap() {
-		this.activities = new HashMap<String, Double>();
-		this.relations = new HashMap<Pair<String, String>, Double>();
+		this.activities = new HashMap<>();
+		this.relations = new HashMap<>();
+		this.startingActivities = new HashSet<>();
+		this.endingActivities = new HashSet<>();
 	}
 
-	public void addActivity(String activityName, Double value) {
-		this.activities.put(activityName, value);
+	public void addActivity(String activityName, Double relativeFrequency, Double absoluteFrequency) {
+		this.activities.put(activityName, Pair.of(relativeFrequency, absoluteFrequency));
 	}
 
 	public void removeActivity(String activityName) {
 		this.activities.remove(activityName);
 	}
 
-	public void addRelation(String activitySource, String activityTarget, Double value) {
-		relations.put(new ImmutablePair<String, String>(activitySource, activityTarget), value);
+	public void addRelation(String activitySource, String activityTarget, Double relativeFrequency, Double absoluteFrequency) {
+		relations.put(Pair.of(activitySource, activityTarget), Pair.of(relativeFrequency, absoluteFrequency));
 	}
 
 	public void removeRelation(String activitySource, String activityTarget) {
@@ -51,16 +56,24 @@ public class ProcessMap implements GraphvizResponse {
 		return relations.keySet();
 	}
 
-	public Double getActivityValue(String activity) {
-		return this.activities.get(activity);
+	public Double getActivityRelativeFrequency(String activity) {
+		return this.activities.get(activity).getLeft();
+	}
+	
+	public Double getActivityAbsoluteFrequency(String activity) {
+		return this.activities.get(activity).getRight();
 	}
 
-	public Double getRelationValue(Pair<String, String> relation) {
-		return this.relations.get(relation);
+	public Double getRelationRelativeValue(Pair<String, String> relation) {
+		return this.relations.get(relation).getLeft();
+	}
+	
+	public Double getRelationAbsoluteValue(Pair<String, String> relation) {
+		return this.relations.get(relation).getRight();
 	}
 
 	public Set<String> getIncomingActivities(String candidate) {
-		Set<String> result = new HashSet<String>();
+		Set<String> result = new HashSet<>();
 		for (Pair<String, String> relation : getRelations()) {
 			if (relation.getRight().equals(candidate)) {
 				result.add(relation.getLeft());
@@ -70,7 +83,7 @@ public class ProcessMap implements GraphvizResponse {
 	}
 
 	public Set<String> getOutgoingActivities(String candidate) {
-		Set<String> result = new HashSet<String>();
+		Set<String> result = new HashSet<>();
 		for (Pair<String, String> relation : getRelations()) {
 			if (relation.getLeft().equals(candidate)) {
 				result.add(relation.getRight());
@@ -78,13 +91,21 @@ public class ProcessMap implements GraphvizResponse {
 		}
 		return result;
 	}
+	
+	public void addStartingActivity(String activity) {
+		startingActivities.add(activity);
+	}
+	
+	public void addEndActivity(String activity) {
+		endingActivities.add(activity);
+	}
 
 	public boolean isStartActivity(String candidate) {
-		return getIncomingActivities(candidate).size() == 0;
+		return getIncomingActivities(candidate).isEmpty() || startingActivities.contains(candidate);
 	}
 
 	public boolean isEndActivity(String candidate) {
-		return getOutgoingActivities(candidate).size() == 0;
+		return getOutgoingActivities(candidate).isEmpty() || endingActivities.contains(candidate);
 	}
 
 	public boolean isIsolatedNode(String candidate) {

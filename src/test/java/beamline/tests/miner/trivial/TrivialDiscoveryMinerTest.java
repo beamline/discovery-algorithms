@@ -1,64 +1,66 @@
 package beamline.tests.miner.trivial;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.deckfour.xes.extension.std.XConceptExtension;
-import org.deckfour.xes.factory.XFactory;
-import org.deckfour.xes.factory.XFactoryNaiveImpl;
-import org.deckfour.xes.model.XEvent;
-import org.deckfour.xes.model.XTrace;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.junit.jupiter.api.Test;
 
+import beamline.events.BEvent;
+import beamline.miners.trivial.DirectlyFollowsDependencyDiscoveryMiner;
 import beamline.miners.trivial.ProcessMap;
-import beamline.miners.trivial.TrivialDiscoveryMiner;
+import beamline.sources.StringTestSource;
 
 class TrivialDiscoveryMinerTest {
 
-	private static XFactory factory = new XFactoryNaiveImpl();
 	
 	@Test
-	void test_miner() {
-		TrivialDiscoveryMiner m = new TrivialDiscoveryMiner();
-		m.ingest(prepare("A", "c1"));
-		m.ingest(prepare("B", "c1"));
-		m.ingest(prepare("C", "c1"));
-		ProcessMap p = m.getLatestResponse();
+	void test_miner() throws Exception {
+		final List<ProcessMap> results = new LinkedList<>();
+		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+		env
+			.fromElements(
+					BEvent.create("p", "A", "c1"),
+					BEvent.create("p", "B", "c1"),
+					BEvent.create("p", "C", "c1"),
+					BEvent.create("p", "A", "c2"),
+					BEvent.create("p", "B", "c2"),
+					BEvent.create("p", "C", "c2"))
+			.keyBy(BEvent::getProcessName)
+			.flatMap(new DirectlyFollowsDependencyDiscoveryMiner().setModelRefreshRate(1))
+			.executeAndCollect().forEachRemaining((ProcessMap e) -> {
+				results.add(e);
+			});
+		
+		ProcessMap p = results.get(results.size() - 1);
+		assertTrue(p.getActivities().containsAll(Arrays.asList("A", "B", "C")));
+		assertTrue(p.getRelations().containsAll(Arrays.asList(Pair.of("A", "B"), Pair.of("B", "C"))));
+	}
+
+	@Test
+	void test_miner_threshold() throws Exception {
+		
+		final List<ProcessMap> results = new LinkedList<>();
+		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+		env
+			.addSource(new StringTestSource("ABC", "ABC", "ABC", "ABC", "ABC"))
+			.keyBy(BEvent::getProcessName)
+			.flatMap(new DirectlyFollowsDependencyDiscoveryMiner()
+					.setModelRefreshRate(1)
+					.setMinDependency(0.8))
+			.executeAndCollect().forEachRemaining((ProcessMap e) -> {
+				results.add(e);
+			});
+		ProcessMap p = results.get(results.size() - 1);
+		
 		assertTrue(p.getActivities().containsAll(Arrays.asList("A", "B", "C")));
 		assertEquals(p.getActivities().size(), 3);
 		assertTrue(p.getRelations().containsAll(Arrays.asList(Pair.of("A", "B"), Pair.of("B", "C"))));
 		assertEquals(p.getRelations().size(), 2);
 	}
-
-	@Test
-	void test_miner_threshold() {
-		TrivialDiscoveryMiner m = new TrivialDiscoveryMiner();
-		m.setModelRefreshRate(1);
-		m.setMinDependency(0.8);
-		m.ingest(prepare("A", "c1")); m.ingest(prepare("D", "c1")); m.ingest(prepare("C", "c1"));
-		m.ingest(prepare("A", "c2")); m.ingest(prepare("B", "c2")); m.ingest(prepare("C", "c2"));
-		m.ingest(prepare("A", "c3")); m.ingest(prepare("B", "c3")); m.ingest(prepare("C", "c3"));
-		m.ingest(prepare("A", "c4")); m.ingest(prepare("B", "c4")); m.ingest(prepare("C", "c4"));
-		m.ingest(prepare("A", "c5")); m.ingest(prepare("B", "c5")); m.ingest(prepare("C", "c5"));
-		ProcessMap p = m.getLatestResponse();
-		assertTrue(p.getActivities().containsAll(Arrays.asList("A", "B", "C")));
-		assertEquals(p.getActivities().size(), 3);
-		assertTrue(p.getRelations().containsAll(Arrays.asList(Pair.of("A", "B"), Pair.of("B", "C"))));
-		assertEquals(p.getRelations().size(), 2);
-	}
-	
-	
-	private static XTrace prepare(String activityName, String caseId) {
-		XTrace wrapper = factory.createTrace();
-		XEvent event = factory.createEvent();
-		
-		XConceptExtension.instance().assignName(wrapper, caseId);
-		XConceptExtension.instance().assignName(event, activityName);
-		
-		wrapper.add(event);
-		return wrapper;
-	}
-
 }

@@ -30,8 +30,7 @@ public class PMDotNode extends DotNode {
 
 	public void setSecondLine(String secondLine) {
 		if (secondLine != null) {
-			setLabel("<<font point-size='22'>" + label + "</font> <br/><font point-size='16'>" + secondLine
-					+ "</font>>");
+			setLabel("<<font point-size='22'>" + label + "</font> <br/><font point-size='11'>" + secondLine + "</font>>");
 		}
 	}
 
@@ -41,8 +40,7 @@ public class PMDotNode extends DotNode {
 		} else {
 			Color backgroundColor = ColorPalette.getValue(activityColor, weight);
 			Color fontColor = ColorPalette.getFontColor(backgroundColor);
-			setOption("fillcolor", ColorPalette
-					.colorToString(backgroundColor)/* + ":" + ColorPalette.colorToString(backgroundColor.darker()) */);
+			setOption("fillcolor", ColorPalette.colorToString(backgroundColor)/* + ":" + ColorPalette.colorToString(backgroundColor.darker()) */);
 			setOption("fontcolor", ColorPalette.colorToString(fontColor));
 			setOption("fixedsize", "false");
 		}
