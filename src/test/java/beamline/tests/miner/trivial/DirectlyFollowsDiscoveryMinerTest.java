@@ -25,12 +25,12 @@ class DirectlyFollowsDiscoveryMinerTest {
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 		env
 			.fromElements(
-					BEvent.create("p", "A", "c1"),
-					BEvent.create("p", "B", "c1"),
-					BEvent.create("p", "C", "c1"),
-					BEvent.create("p", "A", "c2"),
-					BEvent.create("p", "B", "c2"),
-					BEvent.create("p", "C", "c2"))
+					BEvent.create("p", "c1", "A"),
+					BEvent.create("p", "c1", "B"),
+					BEvent.create("p", "c1", "C"),
+					BEvent.create("p", "c2", "A"),
+					BEvent.create("p", "c2", "B"),
+					BEvent.create("p", "c2", "C"))
 			.keyBy(BEvent::getProcessName)
 			.flatMap(new DirectlyFollowsDependencyDiscoveryMiner().setModelRefreshRate(1))
 			.executeAndCollect().forEachRemaining((ProcessMap e) -> {

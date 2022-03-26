@@ -39,7 +39,7 @@ public class DirectlyFollowsDependencyDiscoveryMiner extends StreamMiningAlgorit
 	}
 	
 	@Override
-	public ProcessMap ingest(BEvent event) throws Exception {
+	public ProcessMap ingest(BEvent event) {
 		String caseID = event.getTraceName();
 		String activityName = event.getEventName();
 		
