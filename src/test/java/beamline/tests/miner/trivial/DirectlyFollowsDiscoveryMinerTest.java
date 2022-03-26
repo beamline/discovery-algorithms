@@ -16,7 +16,7 @@ import beamline.miners.trivial.DirectlyFollowsDependencyDiscoveryMiner;
 import beamline.miners.trivial.ProcessMap;
 import beamline.sources.StringTestSource;
 
-class TrivialDiscoveryMinerTest {
+class DirectlyFollowsDiscoveryMinerTest {
 
 	
 	@Test
